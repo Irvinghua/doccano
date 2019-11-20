@@ -22,6 +22,16 @@ block select-format-area
     )
     | JSONL
 
+  label.radio
+    input(
+      type="radio"
+      name="format"
+      value="txt"
+      v-bind:checked="format == 'txt'"
+      v-model="format"
+    )
+    | TEXT
+
 block example-format-area
   pre.code-block(v-show="format == 'csv'")
     code.csv
@@ -31,6 +41,11 @@ block example-format-area
   pre.code-block(v-show="format == 'json'")
     code.json
       include ./examples/download_seq2seq.jsonl
+      | ...
+
+  pre.code-block(v-show="format == 'txt'")
+    code.json
+      include ./examples/download_seq2seq.txt
       | ...
 </template>
 

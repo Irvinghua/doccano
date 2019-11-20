@@ -314,6 +314,9 @@ class TextDownloadAPI(APIView):
         if format == "json1":
             labels = project.labels.all()
             data = JSONPainter.paint_labels(documents, labels)
+        elif format == "txt":
+            labels = project.labels.all()
+            data = JSONPainter.paint_txt_labels(documents, labels)
         else:
             data = painter.paint(documents)
         return Response(data)
@@ -321,7 +324,7 @@ class TextDownloadAPI(APIView):
     def select_painter(self, format):
         if format == 'csv':
             return CSVPainter()
-        elif format == 'json' or format == "json1":
+        elif format == 'json' or format == "json1" or format == "txt":
             return JSONPainter()
         else:
             raise ValidationError('format {} is invalid.'.format(format))

@@ -2,6 +2,17 @@
 extends ./download.pug
 
 block select-format-area
+
+  label.radio
+    input(
+      type="radio"
+      name="format"
+      value="txt"
+      v-bind:checked="format == 'txt'"
+      v-model="format"
+    )
+    | TEXT
+
   label.radio
     input(
       type="radio"
@@ -31,6 +42,11 @@ block example-format-area
   pre.code-block(v-show="format == 'json1'")
     code.json
       include ./examples/download_sequence_labeling.json1l
+      | ...
+
+  pre.code-block(v-show="format == 'txt'")
+    code.json
+      include ./examples/download_sequence_labeling.txt
       | ...
 </template>
 

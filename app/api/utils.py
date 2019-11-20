@@ -309,7 +309,8 @@ class PlainTextParser(FileParser):
             batch = list(itertools.islice(file, settings.IMPORT_BATCH_SIZE))
             if not batch:
                 break
-            yield [{'text': line.strip()} for line in batch]
+            lines = [line.strip() for line in batch]
+            yield [{'text': line} for line in lines if line]
 
 
 class CSVParser(FileParser):
@@ -376,6 +377,9 @@ class JSONParser(FileParser):
             if len(data) >= settings.IMPORT_BATCH_SIZE:
                 yield data
                 data = []
+            line = line.strip()
+            if not line:
+                continue
             try:
                 j = json.loads(line)
                 j['meta'] = json.dumps(j.get('meta', {}))
@@ -436,6 +440,34 @@ class JSONPainter(object):
             d['labels'] = labels
             d['meta'] = json.loads(d['meta'])
             data.append(d)
+        return data
+
+    @staticmethod
+    def paint_txt_labels(documents, labels):
+        serializer_labels = LabelSerializer(labels, many=True)
+        serializer = DocumentSerializer(documents, many=True)
+        data = ''
+        text_with_labled_list = []
+        for d in serializer.data:
+            labels = []
+            label_count = 0
+            text_with_labled = ""
+            original_text = d['text']
+            original_text_list = list(original_text)
+            annotations_list = d['annotations']
+            if len(annotations_list) > 0:
+                annotations_list = sorted(annotations_list, key=lambda label: label['start_offset'], reverse=False)
+            for a in annotations_list:
+                label_obj = [x for x in serializer_labels.data if x['id'] == a['label']][0]
+                label_text = label_obj['text']
+                label_start = a['start_offset']
+                label_end = a['end_offset']
+                original_text_list.insert(label_start + label_count, "[")
+                original_text_list.insert(label_end + label_count + 1, "]/" + label_text)
+                original_text = ''.join(original_text_list)
+                label_count = label_count + 2
+            text_with_labled_list.append(original_text)
+        data = '。'.join(text_with_labled_list)
         return data
 
 
